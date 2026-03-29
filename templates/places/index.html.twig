@@ -9,9 +9,8 @@
             Explore places on the map and in the list below.
         </p>
 
-        <section style="background: var(--surface); border: 1px solid var(--border); border-radius: 20px; min-height: 340px; padding: 1.5rem; box-shadow: var(--shadow); margin-bottom: 2rem;">
-            <h2 style="margin-top: 0;">Map</h2>
-            <p style="color: var(--muted);">Map view placeholder for now.</p>
+        <section style="border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 2rem;">
+            <div id="map" style="height: 400px;"></div>
         </section>
 
         <section>
@@ -35,4 +34,20 @@
             {% endif %}
         </section>
     </main>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+        const map = L.map('map').setView([50.8798, 4.7005], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        {% for place in places %}
+        L.marker([{{ place.latitude }}, {{ place.longitude }}])
+            .addTo(map)
+            .bindPopup("<strong>{{ place.name }}</strong><br>{{ place.category }}");
+        {% endfor %}
+    </script>
 {% endblock %}
