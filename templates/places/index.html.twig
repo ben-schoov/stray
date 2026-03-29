@@ -21,7 +21,11 @@
             {% else %}
                 <div class="places-grid">
                     {% for place in places %}
-                        <a href="{{ path('app_place_detail', { slug: place.slug }) }}" class="place-card">
+                        <a
+                            href="{{ path('app_place_detail', { slug: place.slug }) }}"
+                            class="place-card"
+                            id="place-{{ place.id }}"
+                        >
                             <div class="place-category">{{ place.category }}</div>
                             <h3>{{ place.name }}</h3>
                             <p>{{ place.description }}</p>
@@ -45,9 +49,21 @@
         }).addTo(map);
 
         {% for place in places %}
-        L.marker([{{ place.latitude }}, {{ place.longitude }}])
+        const marker{{ place.id }} = L.marker([{{ place.latitude }}, {{ place.longitude }}])
             .addTo(map)
             .bindPopup("<strong>{{ place.name }}</strong><br>{{ place.category }}");
+
+        marker{{ place.id }}.on('click', function () {
+            const el = document.getElementById('place-{{ place.id }}');
+            if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.style.outline = '2px solid #7bd8a5';
+
+                setTimeout(() => {
+                    el.style.outline = 'none';
+                }, 1500);
+            }
+        });
         {% endfor %}
     </script>
 {% endblock %}
