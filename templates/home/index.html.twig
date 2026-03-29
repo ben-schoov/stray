@@ -3,25 +3,33 @@
 {% block title %}Stray{% endblock %}
 
 {% block body %}
-    <main style="padding: 2rem; font-family: Arial, sans-serif;">
-        <h1>{{ app_name }}</h1>
-        <p>{{ tagline }}</p>
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="hero-card">
+                    <h1>{{ app_name }}</h1>
+                    <p>{{ tagline }}</p>
+                </div>
 
-        <h2>Places</h2>
+                <h2 class="section-title">Places to explore</h2>
 
-        {% if places is empty %}
-            <p>No places found.</p>
-        {% else %}
-            <ul>
-                {% for place in places %}
-                    <li>
-                        <strong>{{ place.name }}</strong><br>
-                        {{ place.description }}<br>
-                        Category: {{ place.category }}<br>
-                        Coordinates: {{ place.latitude }}, {{ place.longitude }}
-                    </li>
-                {% endfor %}
-            </ul>
-        {% endif %}
+                {% if places is empty %}
+                    <p>No places found yet.</p>
+                {% else %}
+                    <div class="places-grid">
+                        {% for place in places %}
+                            <article class="place-card">
+                                <div class="place-category">{{ place.category }}</div>
+                                <h3>{{ place.name }}</h3>
+                                <p>{{ place.description }}</p>
+                                <div class="place-meta">
+                                    {{ place.latitude }}, {{ place.longitude }}
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </section>
     </main>
 {% endblock %}
