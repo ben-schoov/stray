@@ -9,7 +9,7 @@
             Explore places on the map and in the list below.
         </p>
 
-        <section style="border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 2rem;">
+        <section id="places-map-section" style="border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 2rem;">
             <div id="map" style="height: 400px;"></div>
         </section>
 
@@ -21,18 +21,25 @@
             {% else %}
                 <div class="places-grid">
                     {% for place in places %}
-                        <a
-                            href="{{ path('app_place_detail', { slug: place.slug }) }}"
+                        <article
                             class="place-card"
                             id="place-{{ place.id }}"
+                            data-place-id="{{ place.id }}"
+                            style="cursor: pointer;"
                         >
                             <div class="place-category">{{ place.category }}</div>
                             <h3>{{ place.name }}</h3>
                             <p>{{ place.description }}</p>
-                            <div class="place-meta">
+                            <div class="place-meta" style="margin-bottom: 1rem;">
                                 {{ place.latitude }}, {{ place.longitude }}
                             </div>
-                        </a>
+                            <a
+                                href="{{ path('app_place_detail', { slug: place.slug }) }}"
+                                style="display: inline-block; color: var(--accent-2); font-weight: 700;"
+                            >
+                                View details →
+                            </a>
+                        </article>
                     {% endfor %}
                 </div>
             {% endif %}
@@ -42,6 +49,8 @@
 
 {% block javascripts %}
     <script>
+        const markers = {};
+        const mapSection = document.getElementById('places-map-section');
         const map = L.map('map').setView([50.8798, 4.7005], 13);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -53,8 +62,11 @@
             .addTo(map)
             .bindPopup("<strong>{{ place.name }}</strong><br>{{ place.category }}");
 
+        markers[{{ place.id }}] = marker{{ place.id }};
+
         marker{{ place.id }}.on('click', function () {
             const el = document.getElementById('place-{{ place.id }}');
+
             if (el) {
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 el.style.outline = '2px solid #7bd8a5';
@@ -65,5 +77,28 @@
             }
         });
         {% endfor %}
+
+        document.querySelectorAll('.place-card').forEach((card) => {
+            card.addEventListener('click', function (event) {
+                if (event.target.tagName.toLowerCase() === 'a') {
+                    return;
+                }
+
+                const placeId = this.dataset.placeId;
+                const marker = markers[placeId];
+
+                if (marker) {
+                    mapSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    map.setView(marker.getLatLng(), 15);
+                    marker.openPopup();
+
+                    this.style.outline = '2px solid #7bd8a5';
+
+                    setTimeout(() => {
+                        this.style.outline = 'none';
+                    }, 1500);
+                }
+            });
+        });
     </script>
 {% endblock %}
