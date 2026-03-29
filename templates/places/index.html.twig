@@ -1,0 +1,38 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Places · Stray{% endblock %}
+
+{% block body %}
+    <main class="container" style="padding: 2rem 0 3rem;">
+        <h1>Places</h1>
+        <p style="color: var(--muted); margin-bottom: 1.5rem;">
+            Explore places on the map and in the list below.
+        </p>
+
+        <section style="background: var(--surface); border: 1px solid var(--border); border-radius: 20px; min-height: 340px; padding: 1.5rem; box-shadow: var(--shadow); margin-bottom: 2rem;">
+            <h2 style="margin-top: 0;">Map</h2>
+            <p style="color: var(--muted);">Map view placeholder for now.</p>
+        </section>
+
+        <section>
+            <h2 style="margin-bottom: 1rem;">All places</h2>
+
+            {% if places is empty %}
+                <p>No places found yet.</p>
+            {% else %}
+                <div class="places-grid">
+                    {% for place in places %}
+                        <a href="{{ path('app_place_detail', { slug: place.slug }) }}" class="place-card">
+                            <div class="place-category">{{ place.category }}</div>
+                            <h3>{{ place.name }}</h3>
+                            <p>{{ place.description }}</p>
+                            <div class="place-meta">
+                                {{ place.latitude }}, {{ place.longitude }}
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </section>
+    </main>
+{% endblock %}
