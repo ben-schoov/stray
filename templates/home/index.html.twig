@@ -6,5 +6,22 @@
     <main style="padding: 2rem; font-family: Arial, sans-serif;">
         <h1>{{ app_name }}</h1>
         <p>{{ tagline }}</p>
+
+        <h2>Places</h2>
+
+        {% if places is empty %}
+            <p>No places found.</p>
+        {% else %}
+            <ul>
+                {% for place in places %}
+                    <li>
+                        <strong>{{ place.name }}</strong><br>
+                        {{ place.description }}<br>
+                        Category: {{ place.category }}<br>
+                        Coordinates: {{ place.latitude }}, {{ place.longitude }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
     </main>
 {% endblock %}
