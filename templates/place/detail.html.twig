@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ place.name }} · Stray{% endblock %}
+
+{% block body %}
+    <main class="container" style="padding: 2rem 0;">
+        <a href="{{ path('app_home') }}" style="color: var(--muted);">← Back</a>
+
+        <h1 style="margin-top: 1rem;">{{ place.name }}</h1>
+
+        <p style="color: var(--muted); max-width: 600px;">
+            {{ place.description }}
+        </p>
+
+        <p style="margin-top: 1rem;">
+            <strong>Category:</strong> {{ place.category }}
+        </p>
+
+        <p>
+            <strong>Coordinates:</strong> {{ place.latitude }}, {{ place.longitude }}
+        </p>
+    </main>
+{% endblock %}

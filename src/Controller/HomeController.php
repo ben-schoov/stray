@@ -18,4 +18,18 @@ final class HomeController extends AbstractController
             'places' => $placeRepository->findAll(),
         ]);
     }
+
+    #[Route('/place/{slug}', name: 'app_place_detail')]
+    public function detail(string $slug, PlaceRepository $placeRepository): Response
+    {
+        $place = $placeRepository->findOneBy(['slug' => $slug]);
+
+        if (!$place) {
+            throw $this->createNotFoundException('Place not found');
+        }
+
+        return $this->render('place/detail.html.twig', [
+            'place' => $place,
+        ]);
+    }
 }

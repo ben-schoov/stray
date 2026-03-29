@@ -18,14 +18,14 @@
                 {% else %}
                     <div class="places-grid">
                         {% for place in places %}
-                            <article class="place-card">
+                            <a href="{{ path('app_place_detail', { slug: place.slug }) }}" class="place-card">
                                 <div class="place-category">{{ place.category }}</div>
                                 <h3>{{ place.name }}</h3>
                                 <p>{{ place.description }}</p>
                                 <div class="place-meta">
                                     {{ place.latitude }}, {{ place.longitude }}
                                 </div>
-                            </article>
+                            </a>
                         {% endfor %}
                     </div>
                 {% endif %}
