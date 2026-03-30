@@ -23,6 +23,12 @@
                 <input type="checkbox" id="hidden-filter">
                 Hidden gems only
             </label>
+
+            <select id="sort-filter" style="padding: 0.5rem; border-radius: 8px;">
+                <option value="name-asc">Sort: Name A–Z</option>
+                <option value="name-desc">Sort: Name Z–A</option>
+                <option value="category-asc">Sort: Category A–Z</option>
+            </select>
         </div>
 
         <section id="places-map-section" style="border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 2rem;">
@@ -35,12 +41,13 @@
             {% if places is empty %}
                 <p>No places found yet.</p>
             {% else %}
-                <div class="places-grid">
+                <div class="places-grid" id="places-grid">
                     {% for place in places %}
                         <article
                             class="place-card"
                             id="place-{{ place.id }}"
                             data-place-id="{{ place.id }}"
+                            data-name="{{ place.name|lower }}"
                             data-category="{{ place.category }}"
                             data-hidden="{{ place.isHiddenGem ? '1' : '0' }}"
                             style="cursor: pointer;"
@@ -71,6 +78,8 @@
         const mapSection = document.getElementById('places-map-section');
         const categoryFilter = document.getElementById('category-filter');
         const hiddenFilter = document.getElementById('hidden-filter');
+        const sortFilter = document.getElementById('sort-filter');
+        const placesGrid = document.getElementById('places-grid');
 
         const map = L.map('map').setView([50.8798, 4.7005], 13);
 
@@ -88,7 +97,7 @@
         marker{{ place.id }}.on('click', function () {
             const el = document.getElementById('place-{{ place.id }}');
 
-            if (el) {
+            if (el && el.style.display !== 'none') {
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 el.style.outline = '2px solid #7bd8a5';
 
@@ -154,7 +163,31 @@
             });
         }
 
+        function applySorting() {
+            const cards = Array.from(document.querySelectorAll('.place-card'));
+            const mode = sortFilter.value;
+
+            cards.sort((a, b) => {
+                if (mode === 'name-asc') {
+                    return a.dataset.name.localeCompare(b.dataset.name);
+                }
+
+                if (mode === 'name-desc') {
+                    return b.dataset.name.localeCompare(a.dataset.name);
+                }
+
+                if (mode === 'category-asc') {
+                    return a.dataset.category.localeCompare(b.dataset.category);
+                }
+
+                return 0;
+            });
+
+            cards.forEach((card) => placesGrid.appendChild(card));
+        }
+
         categoryFilter.addEventListener('change', applyFilters);
         hiddenFilter.addEventListener('change', applyFilters);
+        sortFilter.addEventListener('change', applySorting);
     </script>
 {% endblock %}
