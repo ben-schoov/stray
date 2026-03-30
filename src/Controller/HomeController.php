@@ -42,6 +42,8 @@ final class HomeController extends AbstractController
     #[Route('/profile', name: 'app_profile')]
     public function profile(): Response
     {
+        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+
         return $this->render('profile/index.html.twig');
     }
 

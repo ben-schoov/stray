@@ -3,10 +3,30 @@
 {% block title %}Profile · Stray{% endblock %}
 
 {% block body %}
-    <main class="container" style="padding: 2rem 0 3rem;">
-        <h1>Profile</h1>
-        <p style="color: var(--muted);">
-            Profile page placeholder for now.
+    <main class="container page-section">
+        <h1 class="page-title">Profile</h1>
+        <p class="page-subtitle">
+            Your account overview.
         </p>
+
+        <section class="place-card" style="max-width: 520px;">
+            <div class="place-category">Account</div>
+
+            <h3 style="margin-bottom: 1rem;">
+                {{ app.user.username ?? 'User' }}
+            </h3>
+
+            <p><strong>Email:</strong> {{ app.user.email }}</p>
+
+            <p>
+                <strong>Username:</strong>
+                {{ app.user.username ?? 'Not set' }}
+            </p>
+
+            <p>
+                <strong>Google account linked:</strong>
+                {{ app.user.googleId ? 'Yes' : 'No' }}
+            </p>
+        </section>
     </main>
 {% endblock %}
