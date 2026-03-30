@@ -9,6 +9,22 @@
             Explore places on the map and in the list below.
         </p>
 
+        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+            <select id="category-filter" style="padding: 0.5rem; border-radius: 8px;">
+                <option value="">All categories</option>
+                <option value="park">Park</option>
+                <option value="historic">Historic</option>
+                <option value="square">Square</option>
+                <option value="museum">Museum</option>
+                <option value="viewpoint">Viewpoint</option>
+            </select>
+
+            <label style="display: flex; align-items: center; gap: 0.5rem;">
+                <input type="checkbox" id="hidden-filter">
+                Hidden gems only
+            </label>
+        </div>
+
         <section id="places-map-section" style="border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 2rem;">
             <div id="map" style="height: 400px;"></div>
         </section>
@@ -22,6 +38,8 @@
                 <div class="places-grid">
                     {% for place in places %}
                         <article
+                            data-category="{{ place.category }}"
+                            data-hidden="{{ place.isHiddenGem ? '1' : '0' }}"
                             class="place-card"
                             id="place-{{ place.id }}"
                             data-place-id="{{ place.id }}"
@@ -100,5 +118,33 @@
                 }
             });
         });
+
+        const categoryFilter = document.getElementById('category-filter');
+        const hiddenFilter = document.getElementById('hidden-filter');
+
+        function applyFilters() {
+            const category = categoryFilter.value;
+            const hiddenOnly = hiddenFilter.checked;
+
+            document.querySelectorAll('.place-card').forEach((card) => {
+                const cardCategory = card.dataset.category;
+                const isHidden = card.dataset.hidden === '1';
+
+                let visible = true;
+
+                if (category && cardCategory !== category) {
+                    visible = false;
+                }
+
+                if (hiddenOnly && !isHidden) {
+                    visible = false;
+                }
+
+                card.style.display = visible ? '' : 'none';
+            });
+        }
+
+        categoryFilter.addEventListener('change', applyFilters);
+        hiddenFilter.addEventListener('change', applyFilters);
     </script>
 {% endblock %}
