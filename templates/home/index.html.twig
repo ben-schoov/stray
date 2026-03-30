@@ -11,24 +11,83 @@
                     <p>{{ tagline }}</p>
                 </div>
 
-                <h2 class="section-title">Places to explore</h2>
+                <section class="page-section" style="padding: 2rem 0 1rem;">
+                    <h2 class="page-title" style="font-size: 1.6rem;">Start exploring</h2>
+                    <p class="page-subtitle">
+                        Pick an area and discover interesting places, hidden spots, routes, and events.
+                    </p>
 
-                {% if places is empty %}
-                    <p>No places found yet.</p>
-                {% else %}
-                    <div class="places-grid">
-                        {% for place in places %}
-                            <a href="{{ path('app_place_detail', { slug: place.slug }) }}" class="place-card">
-                                <div class="place-category">{{ place.category }}</div>
-                                <h3>{{ place.name }}</h3>
-                                <p>{{ place.description }}</p>
-                                <div class="place-meta">
-                                    {{ place.latitude }}, {{ place.longitude }}
-                                </div>
-                            </a>
-                        {% endfor %}
+                    <div class="control-bar">
+                        <select class="control-select">
+                            <option selected>Leuven</option>
+                            <option disabled>More areas later</option>
+                        </select>
                     </div>
-                {% endif %}
+                </section>
+
+                <section style="padding-bottom: 1rem;">
+                    <h2 class="section-title">Popular places</h2>
+
+                    {% if places is empty %}
+                        <p class="empty-state">No places found yet.</p>
+                    {% else %}
+                        <div class="places-grid">
+                            {% for place in places|slice(0, 3) %}
+                                <a href="{{ path('app_place_detail', { slug: place.slug }) }}" class="place-card">
+                                    <div class="place-category">{{ place.category }}</div>
+                                    <h3>{{ place.name }}</h3>
+                                    <p>{{ place.description }}</p>
+                                    <div class="place-meta">{{ place.latitude }}, {{ place.longitude }}</div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </section>
+
+                <section style="padding-bottom: 1rem;">
+                    <h2 class="section-title">Hidden spots</h2>
+
+                    {% set hiddenPlaces = places|filter(place => place.isHiddenGem) %}
+
+                    {% if hiddenPlaces is empty %}
+                        <p class="empty-state">No hidden spots found yet.</p>
+                    {% else %}
+                        <div class="places-grid">
+                            {% for place in hiddenPlaces|slice(0, 3) %}
+                                <a href="{{ path('app_place_detail', { slug: place.slug }) }}" class="place-card">
+                                    <div class="place-category">{{ place.category }}</div>
+                                    <h3>{{ place.name }}</h3>
+                                    <p>{{ place.description }}</p>
+                                    <div class="place-meta">{{ place.latitude }}, {{ place.longitude }}</div>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </section>
+
+                <section class="page-section" style="padding-top: 1rem;">
+                    <h2 class="section-title">Quick links</h2>
+
+                    <div class="places-grid">
+                        <a href="{{ path('app_places') }}" class="place-card">
+                            <div class="place-category">Explore</div>
+                            <h3>Browse all places</h3>
+                            <p>Open the interactive map and filter locations by type.</p>
+                        </a>
+
+                        <a href="{{ path('app_routes') }}" class="place-card">
+                            <div class="place-category">Routes</div>
+                            <h3>Discover routes</h3>
+                            <p>Find curated walks and routes across the area.</p>
+                        </a>
+
+                        <a href="{{ path('app_events') }}" class="place-card">
+                            <div class="place-category">Events</div>
+                            <h3>See events</h3>
+                            <p>Check what is happening nearby and where it takes place.</p>
+                        </a>
+                    </div>
+                </section>
             </div>
         </section>
     </main>
