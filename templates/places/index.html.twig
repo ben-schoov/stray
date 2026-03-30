@@ -38,11 +38,11 @@
                 <div class="places-grid">
                     {% for place in places %}
                         <article
-                            data-category="{{ place.category }}"
-                            data-hidden="{{ place.isHiddenGem ? '1' : '0' }}"
                             class="place-card"
                             id="place-{{ place.id }}"
                             data-place-id="{{ place.id }}"
+                            data-category="{{ place.category }}"
+                            data-hidden="{{ place.isHiddenGem ? '1' : '0' }}"
                             style="cursor: pointer;"
                         >
                             <div class="place-category">{{ place.category }}</div>
@@ -69,6 +69,9 @@
     <script>
         const markers = {};
         const mapSection = document.getElementById('places-map-section');
+        const categoryFilter = document.getElementById('category-filter');
+        const hiddenFilter = document.getElementById('hidden-filter');
+
         const map = L.map('map').setView([50.8798, 4.7005], 13);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -77,10 +80,10 @@
 
         {% for place in places %}
         const marker{{ place.id }} = L.marker([{{ place.latitude }}, {{ place.longitude }}])
-            .addTo(map)
             .bindPopup("<strong>{{ place.name }}</strong><br>{{ place.category }}");
 
         markers[{{ place.id }}] = marker{{ place.id }};
+        marker{{ place.id }}.addTo(map);
 
         marker{{ place.id }}.on('click', function () {
             const el = document.getElementById('place-{{ place.id }}');
@@ -119,16 +122,15 @@
             });
         });
 
-        const categoryFilter = document.getElementById('category-filter');
-        const hiddenFilter = document.getElementById('hidden-filter');
-
         function applyFilters() {
             const category = categoryFilter.value;
             const hiddenOnly = hiddenFilter.checked;
 
             document.querySelectorAll('.place-card').forEach((card) => {
+                const placeId = card.dataset.placeId;
                 const cardCategory = card.dataset.category;
                 const isHidden = card.dataset.hidden === '1';
+                const marker = markers[placeId];
 
                 let visible = true;
 
@@ -141,6 +143,14 @@
                 }
 
                 card.style.display = visible ? '' : 'none';
+
+                if (marker) {
+                    if (visible) {
+                        marker.addTo(map);
+                    } else {
+                        marker.remove();
+                    }
+                }
             });
         }
 
