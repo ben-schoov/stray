@@ -3,14 +3,14 @@
 {% block title %}Places · Stray{% endblock %}
 
 {% block body %}
-    <main class="container" style="padding: 2rem 0 3rem;">
-        <h1>Places</h1>
-        <p style="color: var(--muted); margin-bottom: 1.5rem;">
+    <main class="container page-section">
+        <h1 class="page-title">Places</h1>
+        <p class="page-subtitle">
             Explore places on the map and in the list below.
         </p>
 
-        <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
-            <select id="category-filter" style="padding: 0.5rem; border-radius: 8px;">
+        <div class="control-bar">
+            <select id="category-filter" class="control-select">
                 <option value="">All categories</option>
                 <option value="park">Park</option>
                 <option value="historic">Historic</option>
@@ -19,27 +19,27 @@
                 <option value="viewpoint">Viewpoint</option>
             </select>
 
-            <label style="display: flex; align-items: center; gap: 0.5rem;">
+            <label class="control-checkbox">
                 <input type="checkbox" id="hidden-filter">
                 Hidden gems only
             </label>
 
-            <select id="sort-filter" style="padding: 0.5rem; border-radius: 8px;">
+            <select id="sort-filter" class="control-select">
                 <option value="name-asc">Sort: Name A–Z</option>
                 <option value="name-desc">Sort: Name Z–A</option>
                 <option value="category-asc">Sort: Category A–Z</option>
             </select>
         </div>
 
-        <section id="places-map-section" style="border: 1px solid var(--border); border-radius: 20px; overflow: hidden; margin-bottom: 2rem;">
-            <div id="map" style="height: 400px;"></div>
+        <section id="places-map-section" class="map-panel">
+            <div id="map" class="map-canvas"></div>
         </section>
 
         <section>
-            <h2 style="margin-bottom: 1rem;">All places</h2>
+            <h2 class="section-title">All places</h2>
 
             {% if places is empty %}
-                <p>No places found yet.</p>
+                <p class="empty-state">No places found yet.</p>
             {% else %}
                 <div class="places-grid" id="places-grid">
                     {% for place in places %}
@@ -55,12 +55,12 @@
                             <div class="place-category">{{ place.category }}</div>
                             <h3>{{ place.name }}</h3>
                             <p>{{ place.description }}</p>
-                            <div class="place-meta" style="margin-bottom: 1rem;">
+                            <div class="place-meta">
                                 {{ place.latitude }}, {{ place.longitude }}
                             </div>
                             <a
                                 href="{{ path('app_place_detail', { slug: place.slug }) }}"
-                                style="display: inline-block; color: var(--accent-2); font-weight: 700;"
+                                class="place-link"
                             >
                                 View details →
                             </a>
@@ -87,6 +87,20 @@
             attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
+        function activateCard(card) {
+            document.querySelectorAll('.place-card').forEach((item) => {
+                item.classList.remove('is-active');
+            });
+
+            if (card) {
+                card.classList.add('is-active');
+
+                setTimeout(() => {
+                    card.classList.remove('is-active');
+                }, 1500);
+            }
+        }
+
         {% for place in places %}
         const marker{{ place.id }} = L.marker([{{ place.latitude }}, {{ place.longitude }}])
             .bindPopup("<strong>{{ place.name }}</strong><br>{{ place.category }}");
@@ -99,11 +113,7 @@
 
             if (el && el.style.display !== 'none') {
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                el.style.outline = '2px solid #7bd8a5';
-
-                setTimeout(() => {
-                    el.style.outline = 'none';
-                }, 1500);
+                activateCard(el);
             }
         });
         {% endfor %}
@@ -121,12 +131,7 @@
                     mapSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     map.setView(marker.getLatLng(), 15);
                     marker.openPopup();
-
-                    this.style.outline = '2px solid #7bd8a5';
-
-                    setTimeout(() => {
-                        this.style.outline = 'none';
-                    }, 1500);
+                    activateCard(this);
                 }
             });
         });
