@@ -1,38 +1,77 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Log in!{% endblock %}
+{% block title %}Login · Stray{% endblock %}
 
 {% block body %}
-    <form method="post">
-        {% if error %}
-            <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-        {% endif %}
+    <main class="container page-section">
+        <div class="place-card" style="max-width: 460px; margin: 0 auto;">
+            <div class="place-category">Welcome back</div>
+            <h1 class="page-title" style="font-size: 2rem; margin-bottom: 0.75rem;">Log in</h1>
+            <p class="page-subtitle">
+                Sign in to track visited places, manage favourites, and access your profile.
+            </p>
 
-        {% if app.user %}
-            <div class="mb-3">
-                You are logged in as {{ app.user.userIdentifier }}, <a href="{{ logout_path() }}">Logout</a>
-            </div>
-        {% endif %}
+            {% if error %}
+                <div style="margin-bottom: 1rem; padding: 0.85rem 1rem; border-radius: 12px; background: rgba(220, 38, 38, 0.14); border: 1px solid rgba(220, 38, 38, 0.3); color: #fecaca;">
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                </div>
+            {% endif %}
 
-        <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-        <label for="username">Email</label>
-        <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-control" autocomplete="email" required autofocus>
-        <label for="password">Password</label>
-        <input type="password" name="_password" id="password" class="form-control" autocomplete="current-password" required>
-        <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
+            {% if app.user %}
+                <div style="margin-bottom: 1rem; padding: 0.85rem 1rem; border-radius: 12px; background: rgba(76, 175, 125, 0.14); border: 1px solid rgba(76, 175, 125, 0.3);">
+                    You are logged in as {{ app.user.userIdentifier }}.
+                    <a href="{{ path('app_logout') }}" class="place-link">Logout</a>
+                </div>
+            {% endif %}
 
-        {#
-            Uncomment this section and add a remember_me option below your firewall to activate remember me functionality.
-            See https://symfony.com/doc/current/security/remember_me.html
+            <form method="post">
+                <div style="margin-bottom: 1rem;">
+                    <label for="username" style="display: block; margin-bottom: 0.5rem;">Email</label>
+                    <input
+                        type="email"
+                        value="{{ last_username }}"
+                        name="_username"
+                        id="username"
+                        class="control-input"
+                        autocomplete="email"
+                        required
+                        autofocus
+                        style="width: 100%;"
+                    >
+                </div>
 
-            <div class="checkbox mb-3">
-                <input type="checkbox" name="_remember_me" id="_remember_me">
-                <label for="_remember_me">Remember me</label>
-            </div>
-        #}
+                <div style="margin-bottom: 1rem;">
+                    <label for="password" style="display: block; margin-bottom: 0.5rem;">Password</label>
+                    <input
+                        type="password"
+                        name="_password"
+                        id="password"
+                        class="control-input"
+                        autocomplete="current-password"
+                        required
+                        style="width: 100%;"
+                    >
+                </div>
 
-        <button class="btn btn-lg btn-primary" type="submit">
-            Sign in
-        </button>
-    </form>
+                <input
+                    type="hidden"
+                    name="_csrf_token"
+                    value="{{ csrf_token('authenticate') }}"
+                >
+
+                <button
+                    class="control-select"
+                    type="submit"
+                    style="cursor: pointer; min-width: 0; width: 100%; font-weight: 700;"
+                >
+                    Log in
+                </button>
+            </form>
+
+            <p style="margin-top: 1rem; color: var(--muted);">
+                No account yet?
+                <a href="{{ path('app_register') }}" class="place-link">Create one</a>
+            </p>
+        </div>
+    </main>
 {% endblock %}

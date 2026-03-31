@@ -1,19 +1,52 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Register · Stray{% endblock %}
 
 {% block body %}
-    <h1>Register</h1>
+    <main class="container page-section">
+        <div class="place-card" style="max-width: 520px; margin: 0 auto;">
+            <div class="place-category">Join Stray</div>
+            <h1 class="page-title" style="font-size: 2rem; margin-bottom: 0.75rem;">Create account</h1>
+            <p class="page-subtitle">
+                Make an account to save visited places, build your profile, and personalize your exploration.
+            </p>
 
-    {{ form_errors(registrationForm) }}
+            {{ form_start(registrationForm) }}
+            <div style="margin-bottom: 1rem;">
+                {{ form_label(registrationForm.email) }}
+                {{ form_widget(registrationForm.email, { attr: { class: 'control-input', style: 'width: 100%; margin-top: 0.5rem;' } }) }}
+                {{ form_errors(registrationForm.email) }}
+            </div>
 
-    {{ form_start(registrationForm) }}
-        {{ form_row(registrationForm.email) }}
-        {{ form_row(registrationForm.plainPassword, {
-            label: 'Password'
-        }) }}
-        {{ form_row(registrationForm.agreeTerms) }}
+            <div style="margin-bottom: 1rem;">
+                {{ form_label(registrationForm.username) }}
+                {{ form_widget(registrationForm.username, { attr: { class: 'control-input', style: 'width: 100%; margin-top: 0.5rem;' } }) }}
+                {{ form_errors(registrationForm.username) }}
+            </div>
 
-        <button type="submit" class="btn">Register</button>
-    {{ form_end(registrationForm) }}
+            <div style="margin-bottom: 1rem;">
+                {{ form_label(registrationForm.plainPassword) }}
+                {{ form_widget(registrationForm.plainPassword, { attr: { class: 'control-input', style: 'width: 100%; margin-top: 0.5rem;' } }) }}
+                {{ form_errors(registrationForm.plainPassword) }}
+            </div>
+
+            <div style="margin-bottom: 1rem; color: var(--muted);">
+                {{ form_row(registrationForm.agreeTerms) }}
+            </div>
+
+            <button
+                type="submit"
+                class="control-select"
+                style="cursor: pointer; min-width: 0; width: 100%; font-weight: 700;"
+            >
+                Create account
+            </button>
+            {{ form_end(registrationForm) }}
+
+            <p style="margin-top: 1rem; color: var(--muted);">
+                Already have an account?
+                <a href="{{ path('app_login') }}" class="place-link">Log in</a>
+            </p>
+        </div>
+    </main>
 {% endblock %}
