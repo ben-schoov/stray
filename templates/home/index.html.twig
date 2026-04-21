@@ -9,6 +9,21 @@
                 <div class="hero-card">
                     <h1>{{ app_name }}</h1>
                     <p>{{ tagline }}</p>
+
+                    <div style="margin-top: 1.5rem;">
+                        {% if app.user %}
+                            <a href="{{ path('app_places') }}" class="place-link" style="font-size: 1.1rem;">
+                                Continue exploring →
+                            </a>
+                        {% else %}
+                            <a href="{{ path('app_register') }}" class="place-link" style="font-size: 1.1rem; margin-right: 1rem;">
+                                Create account →
+                            </a>
+                            <a href="{{ path('app_login') }}" class="place-link" style="font-size: 1.1rem;">
+                                Log in →
+                            </a>
+                        {% endif %}
+                    </div>
                 </div>
 
                 <section class="page-section" style="padding: 2rem 0 1rem;">
