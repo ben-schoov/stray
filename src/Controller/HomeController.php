@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\EventRepository;
 use App\Repository\PlaceRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -34,9 +35,11 @@ final class HomeController extends AbstractController
     }
 
     #[Route('/events', name: 'app_events')]
-    public function events(): Response
+    public function events(EventRepository $eventRepository): Response
     {
-        return $this->render('events/index.html.twig');
+        return $this->render('events/index.html.twig', [
+            'events' => $eventRepository->findAll(),
+        ]);
     }
 
     #[Route('/profile', name: 'app_profile')]
