@@ -20,9 +20,15 @@
                     <div class="control-bar">
                         <select class="control-select">
                             <option selected>Leuven</option>
+                            <option selected>Antwerp</option>
                             <option disabled>More areas later</option>
                         </select>
                     </div>
+
+                </section>
+
+                <section id="places-map-section" class="map-panel">
+                    <div id="map" class="map-canvas"></div>
                 </section>
 
                 <section style="padding-bottom: 1rem;">
@@ -91,4 +97,35 @@
             </div>
         </section>
     </main>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+
+        const map = L.map('map').setView([50.8798, 4.7005], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        document.querySelectorAll('.place-card').forEach((card) => {
+            card.addEventListener('click', function (event) {
+                if (event.target.tagName.toLowerCase() === 'a') {
+                    return;
+                }
+
+                const placeId = this.dataset.placeId;
+                const marker = markers[placeId];
+
+                if (marker) {
+                    mapSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    map.setView(marker.getLatLng(), 15);
+                    marker.openPopup();
+                    activateCard(this);
+                }
+            });
+        });
+    </script>
+
+
 {% endblock %}
