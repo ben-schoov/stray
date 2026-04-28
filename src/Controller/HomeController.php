@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Repository\CityRouteRepository;
 use App\Repository\PlaceRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -28,9 +29,11 @@ final class HomeController extends AbstractController
     }
 
     #[Route('/routes', name: 'app_routes')]
-    public function routes(): Response
+    public function routes(CityRouteRepository $cityRouteRepository): Response
     {
-        return $this->render('routes/index.html.twig');
+        return $this->render('routes/index.html.twig', [
+            'cityData' => $cityRouteRepository->getCityData(),
+        ]);
     }
 
     #[Route('/events', name: 'app_events')]
