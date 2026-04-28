@@ -1,12 +1,231 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Routes · Stray{% endblock %}
+{% block title %}Routes - Stray{% endblock %}
 
 {% block body %}
-    <main class="container" style="padding: 2rem 0 3rem;">
-        <h1>Routes</h1>
-        <p style="color: var(--muted);">
-            Route discovery page placeholder for now.
-        </p>
-    </main>
+<main>
+    <section class="hero">
+        <div class="container">
+            <div class="map-wrapper">
+                <div class="city-bar">
+                    <button class="city-nav prev" type="button" aria-label="Previous city">&lsaquo;</button>
+
+                    <div class="city-center">
+                        <select id="city-select">
+                            {% for key, city in cityData %}
+                                <option value="{{ key }}">{{ city.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button class="city-nav next" type="button" aria-label="Next city">&rsaquo;</button>
+                </div>
+
+                <div class="map-layout">
+                    <section class="map-panel">
+                        <div id="map" class="map-canvas"></div>
+                    </section>
+
+                    <aside class="map-sidebar" id="route-list" aria-live="polite"></aside>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    const cityData = {{ cityData|json_encode|raw }};
+
+    const cityKeys = Object.keys(cityData);
+    let currentCityKey = document.getElementById('city-select').value || cityKeys[0];
+    let currentCityIndex = cityKeys.findIndex((key) => key === currentCityKey);
+    if (currentCityIndex < 0) {
+        currentCityKey = cityKeys[0];
+        currentCityIndex = 0;
+    }
+
+    const map = L.map('map').setView(cityData[currentCityKey].coords, cityData[currentCityKey].zoom);
+    const routeList = document.getElementById('route-list');
+    const citySelect = document.getElementById('city-select');
+
+    let activeRouteLayer = null;
+    let activeRouteMarkers = [];
+    let activeRequestToken = 0;
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    function clearActiveRoute() {
+        if (activeRouteLayer) {
+            map.removeLayer(activeRouteLayer);
+            activeRouteLayer = null;
+        }
+
+        activeRouteMarkers.forEach((marker) => map.removeLayer(marker));
+        activeRouteMarkers = [];
+    }
+
+    function formatKm(distanceMeters) {
+        return `${(distanceMeters / 1000).toFixed(1)} km`;
+    }
+
+    function formatMinutes(durationSeconds) {
+        return `${Math.round(durationSeconds / 60)} min`;
+    }
+
+    function getRoutePoints(route) {
+        const stops = route.stops || [];
+        return [route.start, ...stops.map((stop) => stop.coords), route.end];
+    }
+
+    async function fetchRouteGeometry(route) {
+        const coordString = getRoutePoints(route).map(([lat, lng]) => `${lng},${lat}`).join(';');
+        const urls = [
+            `https://routing.openstreetmap.de/routed-foot/route/v1/driving/${coordString}?overview=full&geometries=geojson`,
+            `https://router.project-osrm.org/route/v1/driving/${coordString}?overview=full&geometries=geojson`
+        ];
+
+        for (const url of urls) {
+            const response = await fetch(url);
+            if (!response.ok) {
+                continue;
+            }
+
+            const data = await response.json();
+            const match = data.routes && data.routes[0];
+            if (!match || !match.geometry || !match.geometry.coordinates) {
+                continue;
+            }
+
+            const latLngPath = match.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+            return {
+                path: latLngPath,
+                distance: match.distance,
+                duration: match.duration
+            };
+        }
+
+        throw new Error('No route geometry found from routing providers');
+    }
+
+    async function drawRoute(route, metaElement, requestToken) {
+        clearActiveRoute();
+
+        let geometry;
+        try {
+            geometry = await fetchRouteGeometry(route);
+        } catch (error) {
+            geometry = {
+                path: getRoutePoints(route),
+                distance: null,
+                duration: null
+            };
+        }
+
+        if (requestToken !== activeRequestToken) {
+            return;
+        }
+
+        activeRouteLayer = L.polyline(geometry.path, {
+            color: '#7bd8a5',
+            weight: 5,
+            opacity: 0.95
+        }).addTo(map);
+
+        const startMarker = L.circleMarker(route.start, {
+            radius: 6,
+            color: '#7bd8a5',
+            fillColor: '#7bd8a5',
+            fillOpacity: 1
+        }).bindPopup(`Start: ${route.from}`).addTo(map);
+
+        const endMarker = L.circleMarker(route.end, {
+            radius: 6,
+            color: '#4caf7d',
+            fillColor: '#4caf7d',
+            fillOpacity: 1
+        }).bindPopup(`End: ${route.to}`).addTo(map);
+
+        const stopMarkers = (route.stops || []).map((stop, index) =>
+            L.circleMarker(stop.coords, {
+                radius: 5,
+                color: '#f59e0b',
+                fillColor: '#fbbf24',
+                fillOpacity: 1
+            }).bindPopup(`Stop ${index + 1}: ${stop.name}`).addTo(map)
+        );
+
+        if (metaElement && geometry.distance && geometry.duration) {
+            metaElement.textContent = `${route.from} -> ${route.to} - ${formatKm(geometry.distance)} - ${formatMinutes(geometry.duration)}`;
+        } else if (metaElement) {
+            const stopCount = (route.stops || []).length;
+            const viaText = stopCount > 0 ? ` - via ${stopCount} stop${stopCount > 1 ? 's' : ''}` : '';
+            metaElement.textContent = `${route.from} -> ${route.to}${viaText}`;
+        }
+
+        activeRouteMarkers = [startMarker, endMarker, ...stopMarkers];
+        map.fitBounds(activeRouteLayer.getBounds(), { padding: [35, 35] });
+    }
+
+    async function selectRoute(card, route) {
+        document.querySelectorAll('.route-card').forEach((item) => item.classList.remove('is-active'));
+        card.classList.add('is-active');
+        card.classList.add('is-loading');
+        const metaElement = card.querySelector('.route-meta');
+        const stopCount = (route.stops || []).length;
+        const viaText = stopCount > 0 ? ` - via ${stopCount} stop${stopCount > 1 ? 's' : ''}` : '';
+        if (metaElement) {
+            metaElement.textContent = `${route.from} -> ${route.to}${viaText} - loading...`;
+        }
+
+        activeRequestToken += 1;
+        const requestToken = activeRequestToken;
+        await drawRoute(route, metaElement, requestToken);
+
+        if (requestToken === activeRequestToken) {
+            card.classList.remove('is-loading');
+        }
+    }
+
+    function renderRoutes(cityKey) {
+        const city = cityData[cityKey];
+        routeList.innerHTML = '';
+        clearActiveRoute();
+
+        city.routes.forEach((route) => {
+            const card = document.createElement('button');
+            card.type = 'button';
+            card.className = 'card route-card';
+            const stopCount = (route.stops || []).length;
+            const viaText = stopCount > 0 ? ` - via ${stopCount} stop${stopCount > 1 ? 's' : ''}` : '';
+            card.innerHTML = `<strong>${route.title}</strong><span class="route-meta">${route.from} &rarr; ${route.to}${viaText}</span>`;
+
+            card.addEventListener('click', () => selectRoute(card, route));
+            routeList.appendChild(card);
+        });
+    }
+
+    function updateCity(index) {
+        currentCityIndex = (index + cityKeys.length) % cityKeys.length;
+        currentCityKey = cityKeys[currentCityIndex];
+        const city = cityData[currentCityKey];
+
+        citySelect.value = currentCityKey;
+        map.flyTo(city.coords, city.zoom);
+        renderRoutes(currentCityKey);
+    }
+
+    document.querySelector('.prev').onclick = () => updateCity(currentCityIndex - 1);
+    document.querySelector('.next').onclick = () => updateCity(currentCityIndex + 1);
+
+    citySelect.onchange = (event) => {
+        const selectedIndex = cityKeys.findIndex((key) => key === event.target.value);
+        updateCity(selectedIndex);
+    };
+
+    renderRoutes(currentCityKey);
+</script>
 {% endblock %}
